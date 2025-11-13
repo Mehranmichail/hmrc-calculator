@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HMRC Penalty Calculator</title>
+<style>
+body {
+    font-family: Arial, sans-serif;
+    max-width: 800px;
+    margin: 20px auto;
+    padding: 20px;
+    background: #f5f5f5;
+}
+.calculator {
+    background: white;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+h1 {
+    color: #2a5298;
+    text-align: center;
+    margin-bottom: 30px;
+}
+.section {
+    background: #f8f9fa;
+    padding: 20px;
+    margin: 20px 0;
+    border-radius: 8px;
+}
+h3 {
+    color: #2a5298;
+    margin-bottom: 15px;
+}
+label {
+    display: block;
+    margin: 10px 0 5px 0;
+    font-weight: bold;
+    color: #333;
+}
+input {
+    width: 100%;
+    padding: 10px;
+    border: 2px solid #ddd;
+    border-radius: 5px;
+    font-size: 16px;
+    box-sizing: border-box;
+}
+input:focus {
+    outline: none;
+    border-color: #667eea;
+}
+button {
+    width: 100%;
+    padding: 15px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 20px;
+    transition: transform 0.2s;
+}
+button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+}
+.result {
+    background: white;
+    padding: 20px;
+    margin: 20px 0;
+    border-left: 4px solid #2a5298;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+.result h4 {
+    color: #2a5298;
+    margin-bottom: 10px;
+    font-size: 18px;
+}
+.result p {
+    margin: 8px 0;
+    color: #555;
+}
+.total {
+    background: #e3f2fd;
+    padding: 15px;
+    margin-top: 15px;
+    border-radius: 5px;
+    font-size: 20px;
+    font-weight: bold;
+    text-align: center;
+    color: #d32f2f;
+}
+.grand-total {
+    background: #f0f4ff;
+    padding: 20px;
+    margin: 20px 0;
+    border-left: 4px solid #d32f2f;
+    border-radius: 5px;
+}
+.grand-total h4 {
+    color: #2a5298;
+    text-align: center;
+    margin-bottom: 15px;
+}
+.grand-total .total {
+    font-size: 28px;
+    background: #e3f2fd;
+}
+</style>
+</head>
+<body>
+
+<div class="calculator">
+    <h1>HMRC Penalty Calculator</h1>
+    
+    <div class="section">
+        <h3>📄 Self Assessment - Filing Late</h3>
+        
+        <label>Filing Deadline:</label>
+        <input type="date" id="deadline1" value="2025-01-31">
+        
+        <label>Actual Filing Date:</label>
+        <input type="date" id="filed1" value="2025-10-31">
+        
+        <label>Tax Due (£):</label>
+        <input type="number" id="tax1" value="2000" min="0" step="0.01">
+    </div>
+    
+    <div class="section">
+        <h3>💷 Self Assessment - Payment Late</h3>
+        
+        <label>Payment Deadline:</label>
+        <input type="date" id="deadline2" value="2025-01-31">
+        
+        <label>Actual Payment Date:</label>
+        <input type="date" id="paid2" value="2025-10-31">
+        
+        <label>Amount Unpaid (£):</label>
+        <input type="number" id="unpaid2" value="2000" min="0" step="0.01">
+    </div>
+    
+    <button id="calcBtn">Calculate Penalties</button>
+    
+    <div id="results"></div>
+</div>
+
+<script>
+document.getElementById('calcBtn').onclick = function() {
+    var d1 = new Date(document.getElementById('deadline1').value);
+    var f1 = new Date(document.getElementById('filed1').value);
+    var tax1 = parseFloat(document.getElementById('tax1').value) || 0;
+    
+    var d2 = new Date(document.getElementById('deadline2').value);
+    var p2 = new Date(document.getElementById('paid2').value);
+    var unpaid = parseFloat(document.getElementById('unpaid2').value) || 0;
+    
+    var daysLate1 = Math.ceil((f1 - d1) / 86400000);
+    if (daysLate1 < 0) daysLate1 = 0;
+    
+    var daysLate2 = Math.ceil((p2 - d2) / 86400000);
+    if (daysLate2 < 0) daysLate2 = 0;
+    
+    var html = '';
+    var grandTotal = 0;
+    
+    // FILING PENALTIES
+    if (daysLate1 > 0) {
+        var filingTotal = 0;
+        html += '<div class="result"><h4>📄 Filing Penalties</h4>';
+        html += '<p><strong>Days late:</strong> ' + daysLate1 + '</p>';
+        
+        if (daysLate1 >= 1) {
+            html += '<p>• Initial penalty: £100.00</p>';
+            filingTotal += 100;
+        }
+        
+        if (daysLate1 > 90) {
+            var dailyDays = Math.min(90, daysLate1 - 90);
+            var dailyPen = dailyDays * 10;
+            html += '<p>• Daily penalties (£10 × ' + dailyDays + ' days): £' + dailyPen.toFixed(2) + '</p>';
+            filingTotal += dailyPen;
+        }
+        
+        if (daysLate1 > 180) {
+            var pen6m = Math.max(300, tax1 * 0.05);
+            html += '<p>• 6 months penalty (5% or £300 minimum): £' + pen6m.toFixed(2) + '</p>';
+            filingTotal += pen6m;
+        }
+        
+        if (daysLate1 > 365) {
+            var pen12m = Math.max(300, tax1 * 0.05);
+            html += '<p>• 12 months penalty (5% or £300 minimum): £' + pen12m.toFixed(2) + '</p>';
+            filingTotal += pen12m;
+        }
+        
+        html += '<div class="total">Filing Penalties Total: £' + filingTotal.toFixed(2) + '</div>';
+        html += '</div>';
+        grandTotal += filingTotal;
+    }
+    
+    // PAYMENT PENALTIES
+    if (daysLate2 > 0) {
+        var paymentTotal = 0;
+        html += '<div class="result"><h4>💷 Payment Penalties</h4>';
+        html += '<p><strong>Days late:</strong> ' + daysLate2 + '</p>';
+        
+        if (daysLate2 >= 30) {
+            var pen30 = unpaid * 0.05;
+            html += '<p>• 30 days penalty (5%): £' + pen30.toFixed(2) + '</p>';
+            paymentTotal += pen30;
+        }
+        
+        if (daysLate2 >= 180) {
+            var pen6m = unpaid * 0.05;
+            html += '<p>• 6 months penalty (5%): £' + pen6m.toFixed(2) + '</p>';
+            paymentTotal += pen6m;
+        }
+        
+        if (daysLate2 >= 365) {
+            var pen12m = unpaid * 0.05;
+            html += '<p>• 12 months penalty (5%): £' + pen12m.toFixed(2) + '</p>';
+            paymentTotal += pen12m;
+        }
+        
+        html += '<div class="total">Payment Penalties Total: £' + paymentTotal.toFixed(2) + '</div>';
+        html += '</div>';
+        grandTotal += paymentTotal;
+        
+        // INTEREST
+        var interest = unpaid * 0.08 * daysLate2 / 365;
+        html += '<div class="result"><h4>📈 Interest</h4>';
+        html += '<p><strong>Rate:</strong> 8.00% per annum</p>';
+        html += '<p><strong>Period:</strong> ' + daysLate2 + ' days</p>';
+        html += '<p><strong>Calculation:</strong> £' + unpaid.toFixed(2) + ' × 8% × ' + daysLate2 + '/365</p>';
+        html += '<div class="total">Interest Total: £' + interest.toFixed(2) + '</div>';
+        html += '</div>';
+        grandTotal += interest;
+    }
+    
+    // GRAND TOTAL
+    if (grandTotal > 0) {
+        html += '<div class="grand-total">';
+        html += '<h4>GRAND TOTAL</h4>';
+        html += '<div class="total">£' + grandTotal.toFixed(2) + '</div>';
+        html += '</div>';
+    } else {
+        html = '<div class="result"><h4>No Penalties</h4><p>No penalties calculated. Please check your dates.</p></div>';
+    }
+    
+    document.getElementById('results').innerHTML = html;
+};
+</script>
+
+</body>
+</html>
+```
+
+4. Click **"Commit changes"** (green button at the bottom)
+
+## Step 4: Enable GitHub Pages
+
+1. In your repository, click on **"Settings"** (top menu)
+2. Scroll down to **"Pages"** in the left sidebar
+3. Under **"Source"**, select **"main"** branch
+4. Click **"Save"**
+5. Wait about 1-2 minutes
+
+## Step 5: Get Your URL
+
+Your calculator will be live at:
+```
+https://mehranmichail.github.io/hmrc-calculator/
