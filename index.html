@@ -168,7 +168,6 @@ document.getElementById('calcBtn').onclick = function() {
     var html = '';
     var grandTotal = 0;
     
-    // FILING PENALTIES
     if (daysLate1 > 0) {
         var filingTotal = 0;
         html += '<div class="result"><h4>📄 Filing Penalties</h4>';
@@ -203,7 +202,6 @@ document.getElementById('calcBtn').onclick = function() {
         grandTotal += filingTotal;
     }
     
-    // PAYMENT PENALTIES
     if (daysLate2 > 0) {
         var paymentTotal = 0;
         html += '<div class="result"><h4>💷 Payment Penalties</h4>';
@@ -231,7 +229,6 @@ document.getElementById('calcBtn').onclick = function() {
         html += '</div>';
         grandTotal += paymentTotal;
         
-        // INTEREST
         var interest = unpaid * 0.08 * daysLate2 / 365;
         html += '<div class="result"><h4>📈 Interest</h4>';
         html += '<p><strong>Rate:</strong> 8.00% per annum</p>';
@@ -242,7 +239,6 @@ document.getElementById('calcBtn').onclick = function() {
         grandTotal += interest;
     }
     
-    // GRAND TOTAL
     if (grandTotal > 0) {
         html += '<div class="grand-total">';
         html += '<h4>GRAND TOTAL</h4>';
@@ -258,20 +254,3 @@ document.getElementById('calcBtn').onclick = function() {
 
 </body>
 </html>
-```
-
-4. Click **"Commit changes"** (green button at the bottom)
-
-## Step 4: Enable GitHub Pages
-
-1. In your repository, click on **"Settings"** (top menu)
-2. Scroll down to **"Pages"** in the left sidebar
-3. Under **"Source"**, select **"main"** branch
-4. Click **"Save"**
-5. Wait about 1-2 minutes
-
-## Step 5: Get Your URL
-
-Your calculator will be live at:
-```
-https://mehranmichail.github.io/hmrc-calculator/
