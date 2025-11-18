@@ -1,256 +1,308 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>HMRC Penalty Calculator</title>
-<style>
-body {
-    font-family: Arial, sans-serif;
-    max-width: 800px;
-    margin: 20px auto;
-    padding: 20px;
-    background: #f5f5f5;
-}
-.calculator {
-    background: white;
-    padding: 30px;
-    border-radius: 10px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-}
-h1 {
-    color: #2a5298;
-    text-align: center;
-    margin-bottom: 30px;
-}
-.section {
-    background: #f8f9fa;
-    padding: 20px;
-    margin: 20px 0;
-    border-radius: 8px;
-}
-h3 {
-    color: #2a5298;
-    margin-bottom: 15px;
-}
-label {
-    display: block;
-    margin: 10px 0 5px 0;
-    font-weight: bold;
-    color: #333;
-}
-input {
-    width: 100%;
-    padding: 10px;
-    border: 2px solid #ddd;
-    border-radius: 5px;
-    font-size: 16px;
-    box-sizing: border-box;
-}
-input:focus {
-    outline: none;
-    border-color: #667eea;
-}
-button {
-    width: 100%;
-    padding: 15px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    border: none;
-    border-radius: 8px;
-    font-size: 18px;
-    font-weight: bold;
-    cursor: pointer;
-    margin-top: 20px;
-    transition: transform 0.2s;
-}
-button:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
-}
-.result {
-    background: white;
-    padding: 20px;
-    margin: 20px 0;
-    border-left: 4px solid #2a5298;
-    border-radius: 5px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-}
-.result h4 {
-    color: #2a5298;
-    margin-bottom: 10px;
-    font-size: 18px;
-}
-.result p {
-    margin: 8px 0;
-    color: #555;
-}
-.total {
-    background: #e3f2fd;
-    padding: 15px;
-    margin-top: 15px;
-    border-radius: 5px;
-    font-size: 20px;
-    font-weight: bold;
-    text-align: center;
-    color: #d32f2f;
-}
-.grand-total {
-    background: #f0f4ff;
-    padding: 20px;
-    margin: 20px 0;
-    border-left: 4px solid #d32f2f;
-    border-radius: 5px;
-}
-.grand-total h4 {
-    color: #2a5298;
-    text-align: center;
-    margin-bottom: 15px;
-}
-.grand-total .total {
-    font-size: 28px;
-    background: #e3f2fd;
-}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HMRC Penalty Calculator</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: transparent;
+            min-height: 100vh;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: linear-gradient(135deg, #ffffff 0%, #87CEEB 100%);
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+        .content { padding: 30px; }
+        .tab-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+        .tab-button {
+            flex: 1;
+            padding: 15px;
+            background: none;
+            border: none;
+            border-bottom: 3px solid transparent;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            color: #666;
+            transition: all 0.3s;
+        }
+        .tab-button:hover { color: #2a5298; background: #f5f5f5; }
+        .tab-button.active {
+            color: #2a5298;
+            border-bottom-color: #2a5298;
+            background: #f0f4ff;
+        }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .form-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        .form-section h3 {
+            color: #2a5298;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+        .form-group { margin-bottom: 15px; }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+            font-weight: 500;
+        }
+        input[type="date"],
+        input[type="number"],
+        select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1em;
+        }
+        input:focus, select:focus {
+            outline: none;
+            border-color: #2a5298;
+        }
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        .checkbox-group input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+        .checkbox-group label {
+            margin: 0;
+            cursor: pointer;
+            font-weight: normal;
+        }
+        .calculate-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .calculate-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        .results {
+            display: none;
+            margin-top: 30px;
+        }
+        .results.show { display: block; }
+        .result-card {
+            background: #fff;
+            border-left: 4px solid #2a5298;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        .result-card h4 {
+            color: #2a5298;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+        .penalty-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .penalty-item:last-child { border-bottom: none; }
+        .penalty-label { color: #666; }
+        .penalty-amount {
+            font-weight: 600;
+            color: #d32f2f;
+        }
+        .total-row {
+            background: #f0f4ff;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .total-label {
+            font-size: 1.2em;
+            font-weight: 700;
+            color: #2a5298;
+        }
+        .total-amount {
+            font-size: 1.5em;
+            font-weight: 700;
+            color: #d32f2f;
+        }
+        .info-box {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .info-box p {
+            color: #1565c0;
+            margin-bottom: 5px;
+        }
+    </style>
 </head>
 <body>
+    <div class="container">
+        <div class="content">
+            <div class="tab-buttons">
+                <button class="tab-button active" onclick="document.getElementById('self-assessment').classList.add('active');document.getElementById('corporation-tax').classList.remove('active');this.classList.add('active');this.nextElementSibling.classList.remove('active');">Self Assessment</button>
+                <button class="tab-button" onclick="document.getElementById('corporation-tax').classList.add('active');document.getElementById('self-assessment').classList.remove('active');this.classList.add('active');this.previousElementSibling.classList.remove('active');">Corporation Tax</button>
+            </div>
 
-<div class="calculator">
-    <h1>HMRC Penalty Calculator</h1>
-    
-    <div class="section">
-        <h3>📄 Self Assessment - Filing Late</h3>
-        
-        <label>Filing Deadline:</label>
-        <input type="date" id="deadline1" value="2025-01-31">
-        
-        <label>Actual Filing Date:</label>
-        <input type="date" id="filed1" value="2025-10-31">
-        
-        <label>Tax Due (£):</label>
-        <input type="number" id="tax1" value="2000" min="0" step="0.01">
+            <div id="self-assessment" class="tab-content active">
+                <div class="info-box">
+                    <p><strong>Deadlines:</strong> File by 31 Jan | Pay by 31 Jan</p>
+                    <p><strong>Interest Rate:</strong> 8.00% per annum</p>
+                </div>
+
+                <div class="form-section">
+                    <h3>📄 Filing Information</h3>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="sa-filed-late" onchange="document.getElementById('sa-filing-fields').style.display=this.checked?'block':'none'">
+                        <label for="sa-filed-late">I filed late</label>
+                    </div>
+                    <div id="sa-filing-fields" style="display: none; margin-top: 15px;">
+                        <div class="form-group">
+                            <label>Filing Deadline:</label>
+                            <input type="date" id="sa-filing-deadline" value="2025-01-31">
+                        </div>
+                        <div class="form-group">
+                            <label>Filing Date:</label>
+                            <input type="date" id="sa-filing-date" value="2025-10-31">
+                        </div>
+                        <div class="form-group">
+                            <label>Tax Due (£):</label>
+                            <input type="number" id="sa-tax-due" value="2000" step="0.01" min="0">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3>💷 Payment Information</h3>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="sa-paid-late" onchange="document.getElementById('sa-payment-fields').style.display=this.checked?'block':'none'">
+                        <label for="sa-paid-late">I paid late</label>
+                    </div>
+                    <div id="sa-payment-fields" style="display: none; margin-top: 15px;">
+                        <div class="form-group">
+                            <label>Payment Deadline:</label>
+                            <input type="date" id="sa-payment-deadline" value="2025-01-31">
+                        </div>
+                        <div class="form-group">
+                            <label>Payment Date:</label>
+                            <input type="date" id="sa-payment-date" value="2025-10-31">
+                        </div>
+                        <div class="form-group">
+                            <label>Amount Unpaid (£):</label>
+                            <input type="number" id="sa-tax-unpaid" value="2000" step="0.01" min="0">
+                        </div>
+                    </div>
+                </div>
+
+                <button class="calculate-btn" onclick="(function(){var fl=document.getElementById('sa-filed-late').checked,pl=document.getElementById('sa-paid-late').checked;if(!fl&&!pl){alert('Please check at least one option');return}var fmt=function(n){return'£'+n.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,',')},cd=function(a,b){return Math.max(0,Math.ceil((new Date(b)-new Date(a))/864e5))},h='',t=0;if(fl){var d1=document.getElementById('sa-filing-deadline').value,d2=document.getElementById('sa-filing-date').value,tx=parseFloat(document.getElementById('sa-tax-due').value)||0,dy=cd(d1,d2),ft=0,fi='';if(dy>=1){fi+='<div class=\"penalty-item\"><span>Initial penalty</span><span class=\"penalty-amount\">£100.00</span></div>';ft+=100}if(dy>90){var dd=Math.min(90,dy-90),dp=dd*10;fi+='<div class=\"penalty-item\"><span>Daily (£10 × '+dd+')</span><span class=\"penalty-amount\">'+fmt(dp)+'</span></div>';ft+=dp}if(dy>180){var p=Math.max(300,tx*0.05);fi+='<div class=\"penalty-item\"><span>6 months (5% or £300)</span><span class=\"penalty-amount\">'+fmt(p)+'</span></div>';ft+=p}if(dy>365){var p=Math.max(300,tx*0.05);fi+='<div class=\"penalty-item\"><span>12 months (5% or £300)</span><span class=\"penalty-amount\">'+fmt(p)+'</span></div>';ft+=p}h+='<div class=\"result-card\"><h4>📄 Filing Penalties</h4><p>Days late: '+dy+'</p>'+fi+'<div class=\"total-row\"><span class=\"total-label\">Total:</span><span class=\"total-amount\">'+fmt(ft)+'</span></div></div>';t+=ft}if(pl){var d1=document.getElementById('sa-payment-deadline').value,d2=document.getElementById('sa-payment-date').value,tx=parseFloat(document.getElementById('sa-tax-unpaid').value)||0,dy=cd(d1,d2),pt=0,pi='';if(dy>=30){var p=tx*0.05;pi+='<div class=\"penalty-item\"><span>30 days (5%)</span><span class=\"penalty-amount\">'+fmt(p)+'</span></div>';pt+=p}if(dy>=180){var p=tx*0.05;pi+='<div class=\"penalty-item\"><span>6 months (5%)</span><span class=\"penalty-amount\">'+fmt(p)+'</span></div>';pt+=p}if(dy>=365){var p=tx*0.05;pi+='<div class=\"penalty-item\"><span>12 months (5%)</span><span class=\"penalty-amount\">'+fmt(p)+'</span></div>';pt+=p}h+='<div class=\"result-card\"><h4>💷 Payment Penalties</h4><p>Days late: '+dy+'</p>'+pi+'<div class=\"total-row\"><span class=\"total-label\">Total:</span><span class=\"total-amount\">'+fmt(pt)+'</span></div></div>';t+=pt;var it=tx*0.08*dy/365;h+='<div class=\"result-card\"><h4>📈 Interest</h4><p>8.00% for '+dy+' days</p><div class=\"total-row\"><span class=\"total-label\">Total:</span><span class=\"total-amount\">'+fmt(it)+'</span></div></div>';t+=it}h+='<div class=\"result-card\" style=\"background:#f0f4ff;border-left-color:#d32f2f\"><div style=\"display:flex;justify-content:space-between;align-items:center\"><span style=\"font-size:1.3em;font-weight:700;color:#2a5298\">GRAND TOTAL:</span><span style=\"font-size:1.8em;font-weight:700;color:#d32f2f\">'+fmt(t)+'</span></div></div>';document.getElementById('sa-results').innerHTML=h;document.getElementById('sa-results').classList.add('show')})()">Calculate Penalties</button>
+                <div id="sa-results" class="results"></div>
+            </div>
+
+            <div id="corporation-tax" class="tab-content">
+                <div class="info-box">
+                    <p><strong>Deadlines:</strong> File within 12 months | Pay within 9 months + 1 day</p>
+                    <p><strong>Interest:</strong> 8.00% standard | 6.50% QIP</p>
+                </div>
+
+                <div class="form-section">
+                    <h3>📄 Filing Information</h3>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="ct-filed-late" onchange="document.getElementById('ct-filing-fields').style.display=this.checked?'block':'none'">
+                        <label for="ct-filed-late">I filed late</label>
+                    </div>
+                    <div id="ct-filing-fields" style="display: none; margin-top: 15px;">
+                        <div class="form-group">
+                            <label>Filing Deadline:</label>
+                            <input type="date" id="ct-filing-deadline" value="2025-03-31">
+                        </div>
+                        <div class="form-group">
+                            <label>Filing Date:</label>
+                            <input type="date" id="ct-filing-date" value="2026-02-01">
+                        </div>
+                        <div class="form-group">
+                            <label>Tax Due (£):</label>
+                            <input type="number" id="ct-tax-due" value="50000" step="0.01" min="0">
+                        </div>
+                        <div class="form-group">
+                            <label>Consecutive Late Returns:</label>
+                            <select id="ct-consecutive">
+                                <option value="1">1 (First time)</option>
+                                <option value="2">2 (Second time)</option>
+                                <option value="3">3+ times</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3>💷 Payment Information</h3>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="ct-paid-late" onchange="document.getElementById('ct-payment-fields').style.display=this.checked?'block':'none'">
+                        <label for="ct-paid-late">I paid late</label>
+                    </div>
+                    <div id="ct-payment-fields" style="display: none; margin-top: 15px;">
+                        <div class="form-group">
+                            <label>Payment Deadline:</label>
+                            <input type="date" id="ct-payment-deadline" value="2025-01-01">
+                        </div>
+                        <div class="form-group">
+                            <label>Payment Date:</label>
+                            <input type="date" id="ct-payment-date" value="2026-02-01">
+                        </div>
+                        <div class="form-group">
+                            <label>Amount Unpaid (£):</label>
+                            <input type="number" id="ct-tax-unpaid" value="50000" step="0.01" min="0">
+                        </div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="ct-is-qip">
+                            <label for="ct-is-qip">Large/Very Large (QIP)</label>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="calculate-btn" onclick="(function(){var fl=document.getElementById('ct-filed-late').checked,pl=document.getElementById('ct-paid-late').checked;if(!fl&&!pl){alert('Please check at least one option');return}var fmt=function(n){return'£'+n.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,',')},cd=function(a,b){return Math.max(0,Math.ceil((new Date(b)-new Date(a))/864e5))},h='',t=0;if(fl){var d1=document.getElementById('ct-filing-deadline').value,d2=document.getElementById('ct-filing-date').value,tx=parseFloat(document.getElementById('ct-tax-due').value)||0,cn=parseInt(document.getElementById('ct-consecutive').value),dy=cd(d1,d2),bp=cn>=3?500:100,ft=0,fi='';if(dy>=1){fi+='<div class=\"penalty-item\"><span>Initial (£'+bp+')</span><span class=\"penalty-amount\">£'+bp+'.00</span></div>';ft+=bp}if(dy>90){fi+='<div class=\"penalty-item\"><span>3 months (£'+bp+')</span><span class=\"penalty-amount\">£'+bp+'.00</span></div>';ft+=bp}if(dy>180){var p=tx*0.10;fi+='<div class=\"penalty-item\"><span>6 months (10%)</span><span class=\"penalty-amount\">'+fmt(p)+'</span></div>';ft+=p}if(dy>365){var p=tx*0.10;fi+='<div class=\"penalty-item\"><span>12 months (10%)</span><span class=\"penalty-amount\">'+fmt(p)+'</span></div>';ft+=p}h+='<div class=\"result-card\"><h4>📄 Filing Penalties</h4><p>Days late: '+dy+' | Consecutive: '+cn+'</p>'+fi+'<div class=\"total-row\"><span class=\"total-label\">Total:</span><span class=\"total-amount\">'+fmt(ft)+'</span></div></div>';t+=ft}if(pl){var d1=document.getElementById('ct-payment-deadline').value,d2=document.getElementById('ct-payment-date').value,tx=parseFloat(document.getElementById('ct-tax-unpaid').value)||0,qp=document.getElementById('ct-is-qip').checked,dy=cd(d1,d2),rt=qp?0.065:0.08,it=tx*rt*dy/365;h+='<div class=\"result-card\"><h4>📈 Interest (NO penalties)</h4><p>'+(rt*100).toFixed(2)+'% '+(qp?'(QIP) ':'')+'for '+dy+' days</p><div class=\"total-row\"><span class=\"total-label\">Total:</span><span class=\"total-amount\">'+fmt(it)+'</span></div></div>';t+=it}h+='<div class=\"result-card\" style=\"background:#f0f4ff;border-left-color:#d32f2f\"><div style=\"display:flex;justify-content:space-between;align-items:center\"><span style=\"font-size:1.3em;font-weight:700;color:#2a5298\">GRAND TOTAL:</span><span style=\"font-size:1.8em;font-weight:700;color:#d32f2f\">'+fmt(t)+'</span></div></div>';document.getElementById('ct-results').innerHTML=h;document.getElementById('ct-results').classList.add('show')})()">Calculate Penalties</button>
+                <div id="ct-results" class="results"></div>
+            </div>
+        </div>
     </div>
-    
-    <div class="section">
-        <h3>💷 Self Assessment - Payment Late</h3>
-        
-        <label>Payment Deadline:</label>
-        <input type="date" id="deadline2" value="2025-01-31">
-        
-        <label>Actual Payment Date:</label>
-        <input type="date" id="paid2" value="2025-10-31">
-        
-        <label>Amount Unpaid (£):</label>
-        <input type="number" id="unpaid2" value="2000" min="0" step="0.01">
-    </div>
-    
-    <button id="calcBtn">Calculate Penalties</button>
-    
-    <div id="results"></div>
-</div>
-
-<script>
-document.getElementById('calcBtn').onclick = function() {
-    var d1 = new Date(document.getElementById('deadline1').value);
-    var f1 = new Date(document.getElementById('filed1').value);
-    var tax1 = parseFloat(document.getElementById('tax1').value) || 0;
-    
-    var d2 = new Date(document.getElementById('deadline2').value);
-    var p2 = new Date(document.getElementById('paid2').value);
-    var unpaid = parseFloat(document.getElementById('unpaid2').value) || 0;
-    
-    var daysLate1 = Math.ceil((f1 - d1) / 86400000);
-    if (daysLate1 < 0) daysLate1 = 0;
-    
-    var daysLate2 = Math.ceil((p2 - d2) / 86400000);
-    if (daysLate2 < 0) daysLate2 = 0;
-    
-    var html = '';
-    var grandTotal = 0;
-    
-    if (daysLate1 > 0) {
-        var filingTotal = 0;
-        html += '<div class="result"><h4>📄 Filing Penalties</h4>';
-        html += '<p><strong>Days late:</strong> ' + daysLate1 + '</p>';
-        
-        if (daysLate1 >= 1) {
-            html += '<p>• Initial penalty: £100.00</p>';
-            filingTotal += 100;
-        }
-        
-        if (daysLate1 > 90) {
-            var dailyDays = Math.min(90, daysLate1 - 90);
-            var dailyPen = dailyDays * 10;
-            html += '<p>• Daily penalties (£10 × ' + dailyDays + ' days): £' + dailyPen.toFixed(2) + '</p>';
-            filingTotal += dailyPen;
-        }
-        
-        if (daysLate1 > 180) {
-            var pen6m = Math.max(300, tax1 * 0.05);
-            html += '<p>• 6 months penalty (5% or £300 minimum): £' + pen6m.toFixed(2) + '</p>';
-            filingTotal += pen6m;
-        }
-        
-        if (daysLate1 > 365) {
-            var pen12m = Math.max(300, tax1 * 0.05);
-            html += '<p>• 12 months penalty (5% or £300 minimum): £' + pen12m.toFixed(2) + '</p>';
-            filingTotal += pen12m;
-        }
-        
-        html += '<div class="total">Filing Penalties Total: £' + filingTotal.toFixed(2) + '</div>';
-        html += '</div>';
-        grandTotal += filingTotal;
-    }
-    
-    if (daysLate2 > 0) {
-        var paymentTotal = 0;
-        html += '<div class="result"><h4>💷 Payment Penalties</h4>';
-        html += '<p><strong>Days late:</strong> ' + daysLate2 + '</p>';
-        
-        if (daysLate2 >= 30) {
-            var pen30 = unpaid * 0.05;
-            html += '<p>• 30 days penalty (5%): £' + pen30.toFixed(2) + '</p>';
-            paymentTotal += pen30;
-        }
-        
-        if (daysLate2 >= 180) {
-            var pen6m = unpaid * 0.05;
-            html += '<p>• 6 months penalty (5%): £' + pen6m.toFixed(2) + '</p>';
-            paymentTotal += pen6m;
-        }
-        
-        if (daysLate2 >= 365) {
-            var pen12m = unpaid * 0.05;
-            html += '<p>• 12 months penalty (5%): £' + pen12m.toFixed(2) + '</p>';
-            paymentTotal += pen12m;
-        }
-        
-        html += '<div class="total">Payment Penalties Total: £' + paymentTotal.toFixed(2) + '</div>';
-        html += '</div>';
-        grandTotal += paymentTotal;
-        
-        var interest = unpaid * 0.08 * daysLate2 / 365;
-        html += '<div class="result"><h4>📈 Interest</h4>';
-        html += '<p><strong>Rate:</strong> 8.00% per annum</p>';
-        html += '<p><strong>Period:</strong> ' + daysLate2 + ' days</p>';
-        html += '<p><strong>Calculation:</strong> £' + unpaid.toFixed(2) + ' × 8% × ' + daysLate2 + '/365</p>';
-        html += '<div class="total">Interest Total: £' + interest.toFixed(2) + '</div>';
-        html += '</div>';
-        grandTotal += interest;
-    }
-    
-    if (grandTotal > 0) {
-        html += '<div class="grand-total">';
-        html += '<h4>GRAND TOTAL</h4>';
-        html += '<div class="total">£' + grandTotal.toFixed(2) + '</div>';
-        html += '</div>';
-    } else {
-        html = '<div class="result"><h4>No Penalties</h4><p>No penalties calculated. Please check your dates.</p></div>';
-    }
-    
-    document.getElementById('results').innerHTML = html;
-};
-</script>
-
 </body>
 </html>
