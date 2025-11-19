@@ -1,308 +1,404 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HMRC Penalty Calculator</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: transparent;
-            min-height: 100vh;
-            padding: 20px;
-            line-height: 1.6;
-        }
-        .container {
-            max-width: 900px;
-            margin: 0 auto;
-            background: linear-gradient(135deg, #ffffff 0%, #87CEEB 100%);
-            border-radius: 15px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            overflow: hidden;
-        }
-        .content { padding: 30px; }
-        .tab-buttons {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 30px;
-            border-bottom: 2px solid #e0e0e0;
-        }
-        .tab-button {
-            flex: 1;
-            padding: 15px;
-            background: none;
-            border: none;
-            border-bottom: 3px solid transparent;
-            cursor: pointer;
-            font-size: 1em;
-            font-weight: 600;
-            color: #666;
-            transition: all 0.3s;
-        }
-        .tab-button:hover { color: #2a5298; background: #f5f5f5; }
-        .tab-button.active {
-            color: #2a5298;
-            border-bottom-color: #2a5298;
-            background: #f0f4ff;
-        }
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
-        .form-section {
-            background: #f8f9fa;
-            padding: 20px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-        }
-        .form-section h3 {
-            color: #2a5298;
-            margin-bottom: 15px;
-            font-size: 1.2em;
-        }
-        .form-group { margin-bottom: 15px; }
-        label {
-            display: block;
-            margin-bottom: 5px;
-            color: #333;
-            font-weight: 500;
-        }
-        input[type="date"],
-        input[type="number"],
-        select {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #ddd;
-            border-radius: 8px;
-            font-size: 1em;
-        }
-        input:focus, select:focus {
-            outline: none;
-            border-color: #2a5298;
-        }
-        .checkbox-group {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 15px;
-            background: white;
-            border-radius: 8px;
-            cursor: pointer;
-        }
-        .checkbox-group input[type="checkbox"] {
-            width: 20px;
-            height: 20px;
-            cursor: pointer;
-        }
-        .checkbox-group label {
-            margin: 0;
-            cursor: pointer;
-            font-weight: normal;
-        }
-        .calculate-btn {
-            width: 100%;
-            padding: 15px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 1.1em;
-            font-weight: 600;
-            cursor: pointer;
-        }
-        .calculate-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
-        }
-        .results {
-            display: none;
-            margin-top: 30px;
-        }
-        .results.show { display: block; }
-        .result-card {
-            background: #fff;
-            border-left: 4px solid #2a5298;
-            padding: 20px;
-            margin-bottom: 15px;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        }
-        .result-card h4 {
-            color: #2a5298;
-            margin-bottom: 10px;
-            font-size: 1.1em;
-        }
-        .penalty-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 10px 0;
-            border-bottom: 1px solid #eee;
-        }
-        .penalty-item:last-child { border-bottom: none; }
-        .penalty-label { color: #666; }
-        .penalty-amount {
-            font-weight: 600;
-            color: #d32f2f;
-        }
-        .total-row {
-            background: #f0f4ff;
-            padding: 15px;
-            border-radius: 8px;
-            margin-top: 10px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .total-label {
-            font-size: 1.2em;
-            font-weight: 700;
-            color: #2a5298;
-        }
-        .total-amount {
-            font-size: 1.5em;
-            font-weight: 700;
-            color: #d32f2f;
-        }
-        .info-box {
-            background: #e3f2fd;
-            border-left: 4px solid #2196f3;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-        }
-        .info-box p {
-            color: #1565c0;
-            margin-bottom: 5px;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="content">
-            <div class="tab-buttons">
-                <button class="tab-button active" onclick="document.getElementById('self-assessment').classList.add('active');document.getElementById('corporation-tax').classList.remove('active');this.classList.add('active');this.nextElementSibling.classList.remove('active');">Self Assessment</button>
-                <button class="tab-button" onclick="document.getElementById('corporation-tax').classList.add('active');document.getElementById('self-assessment').classList.remove('active');this.classList.add('active');this.previousElementSibling.classList.remove('active');">Corporation Tax</button>
+import React, { useState, useEffect } from 'react';
+import { Calculator, AlertCircle, Calendar, Pound } from 'lucide-react';
+
+export default function HMRCPenaltyCalculator() {
+  const [taxDue, setTaxDue] = useState('');
+  const [filingDeadline, setFilingDeadline] = useState('2025-01-31');
+  const [filingDate, setFilingDate] = useState('');
+  const [paymentDeadline, setPaymentDeadline] = useState('2025-01-31');
+  const [paymentDate, setPaymentDate] = useState('');
+  const [results, setResults] = useState(null);
+
+  const CURRENT_INTEREST_RATE = 8.0; // Current rate as of August 2025
+
+  const calculateDaysBetween = (start, end) => {
+    const startDate = new Date(start);
+    const endDate = new Date(end);
+    const diffTime = endDate - startDate;
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays > 0 ? diffDays : 0;
+  };
+
+  const calculateFilingPenalties = (daysLate) => {
+    let penalties = [];
+    let total = 0;
+
+    if (daysLate > 0) {
+      // Initial £100 penalty
+      penalties.push({
+        description: 'Initial late filing penalty',
+        amount: 100,
+        trigger: 'Filed after deadline'
+      });
+      total += 100;
+    }
+
+    if (daysLate > 90) {
+      // Daily penalties (£10 per day for up to 90 days)
+      const dailyPenalty = 90 * 10;
+      penalties.push({
+        description: 'Daily penalties (£10/day for 90 days)',
+        amount: dailyPenalty,
+        trigger: 'More than 3 months late'
+      });
+      total += dailyPenalty;
+    }
+
+    if (daysLate > 180) {
+      // 6 month penalty
+      const taxAmount = parseFloat(taxDue) || 0;
+      const sixMonthPenalty = Math.max(taxAmount * 0.05, 300);
+      penalties.push({
+        description: '6-month late filing penalty',
+        amount: sixMonthPenalty,
+        trigger: 'More than 6 months late'
+      });
+      total += sixMonthPenalty;
+    }
+
+    if (daysLate > 365) {
+      // 12 month penalty
+      const taxAmount = parseFloat(taxDue) || 0;
+      const twelveMonthPenalty = Math.max(taxAmount * 0.05, 300);
+      penalties.push({
+        description: '12-month late filing penalty',
+        amount: twelveMonthPenalty,
+        trigger: 'More than 12 months late'
+      });
+      total += twelveMonthPenalty;
+    }
+
+    return { penalties, total };
+  };
+
+  const calculatePaymentPenalties = (daysLate, taxAmount) => {
+    let penalties = [];
+    let total = 0;
+
+    if (daysLate > 30) {
+      const penalty30 = taxAmount * 0.05;
+      penalties.push({
+        description: 'First 5% penalty',
+        amount: penalty30,
+        trigger: '30 days late'
+      });
+      total += penalty30;
+    }
+
+    if (daysLate > 180) {
+      const penalty6m = taxAmount * 0.05;
+      penalties.push({
+        description: 'Second 5% penalty',
+        amount: penalty6m,
+        trigger: '6 months late'
+      });
+      total += penalty6m;
+    }
+
+    if (daysLate > 365) {
+      const penalty12m = taxAmount * 0.05;
+      penalties.push({
+        description: 'Third 5% penalty',
+        amount: penalty12m,
+        trigger: '12 months late'
+      });
+      total += penalty12m;
+    }
+
+    return { penalties, total };
+  };
+
+  const calculateInterest = (taxAmount, daysLate) => {
+    if (daysLate <= 0) return 0;
+    const dailyRate = CURRENT_INTEREST_RATE / 100 / 365;
+    return taxAmount * dailyRate * daysLate;
+  };
+
+  const handleCalculate = () => {
+    const taxAmount = parseFloat(taxDue) || 0;
+    
+    // Filing penalties
+    const filingDaysLate = filingDate ? calculateDaysBetween(filingDeadline, filingDate) : 0;
+    const filingPenaltiesResult = calculateFilingPenalties(filingDaysLate);
+
+    // Payment penalties and interest
+    const paymentDaysLate = paymentDate ? calculateDaysBetween(paymentDeadline, paymentDate) : 0;
+    const paymentPenaltiesResult = calculatePaymentPenalties(paymentDaysLate, taxAmount);
+    const interest = calculateInterest(taxAmount, paymentDaysLate);
+
+    const grandTotal = filingPenaltiesResult.total + paymentPenaltiesResult.total + interest;
+
+    setResults({
+      filingDaysLate,
+      paymentDaysLate,
+      filingPenalties: filingPenaltiesResult,
+      paymentPenalties: paymentPenaltiesResult,
+      interest,
+      taxAmount,
+      grandTotal
+    });
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 p-4 sm:p-6 lg:p-8">
+      <div className="max-w-5xl mx-auto">
+        {/* Header */}
+        <div className="bg-white rounded-2xl shadow-xl p-6 sm:p-8 mb-6">
+          <div className="flex items-center gap-4 mb-4">
+            <div className="bg-blue-600 p-3 rounded-xl">
+              <Calculator className="text-white" size={32} />
             </div>
-
-            <div id="self-assessment" class="tab-content active">
-                <div class="info-box">
-                    <p><strong>Deadlines:</strong> File by 31 Jan | Pay by 31 Jan</p>
-                    <p><strong>Interest Rate:</strong> 8.00% per annum</p>
-                </div>
-
-                <div class="form-section">
-                    <h3>📄 Filing Information</h3>
-                    <div class="checkbox-group">
-                        <input type="checkbox" id="sa-filed-late" onchange="document.getElementById('sa-filing-fields').style.display=this.checked?'block':'none'">
-                        <label for="sa-filed-late">I filed late</label>
-                    </div>
-                    <div id="sa-filing-fields" style="display: none; margin-top: 15px;">
-                        <div class="form-group">
-                            <label>Filing Deadline:</label>
-                            <input type="date" id="sa-filing-deadline" value="2025-01-31">
-                        </div>
-                        <div class="form-group">
-                            <label>Filing Date:</label>
-                            <input type="date" id="sa-filing-date" value="2025-10-31">
-                        </div>
-                        <div class="form-group">
-                            <label>Tax Due (£):</label>
-                            <input type="number" id="sa-tax-due" value="2000" step="0.01" min="0">
-                        </div>
-                    </div>
-                </div>
-
-                <div class="form-section">
-                    <h3>💷 Payment Information</h3>
-                    <div class="checkbox-group">
-                        <input type="checkbox" id="sa-paid-late" onchange="document.getElementById('sa-payment-fields').style.display=this.checked?'block':'none'">
-                        <label for="sa-paid-late">I paid late</label>
-                    </div>
-                    <div id="sa-payment-fields" style="display: none; margin-top: 15px;">
-                        <div class="form-group">
-                            <label>Payment Deadline:</label>
-                            <input type="date" id="sa-payment-deadline" value="2025-01-31">
-                        </div>
-                        <div class="form-group">
-                            <label>Payment Date:</label>
-                            <input type="date" id="sa-payment-date" value="2025-10-31">
-                        </div>
-                        <div class="form-group">
-                            <label>Amount Unpaid (£):</label>
-                            <input type="number" id="sa-tax-unpaid" value="2000" step="0.01" min="0">
-                        </div>
-                    </div>
-                </div>
-
-                <button class="calculate-btn" onclick="(function(){var fl=document.getElementById('sa-filed-late').checked,pl=document.getElementById('sa-paid-late').checked;if(!fl&&!pl){alert('Please check at least one option');return}var fmt=function(n){return'£'+n.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,',')},cd=function(a,b){return Math.max(0,Math.ceil((new Date(b)-new Date(a))/864e5))},h='',t=0;if(fl){var d1=document.getElementById('sa-filing-deadline').value,d2=document.getElementById('sa-filing-date').value,tx=parseFloat(document.getElementById('sa-tax-due').value)||0,dy=cd(d1,d2),ft=0,fi='';if(dy>=1){fi+='<div class=\"penalty-item\"><span>Initial penalty</span><span class=\"penalty-amount\">£100.00</span></div>';ft+=100}if(dy>90){var dd=Math.min(90,dy-90),dp=dd*10;fi+='<div class=\"penalty-item\"><span>Daily (£10 × '+dd+')</span><span class=\"penalty-amount\">'+fmt(dp)+'</span></div>';ft+=dp}if(dy>180){var p=Math.max(300,tx*0.05);fi+='<div class=\"penalty-item\"><span>6 months (5% or £300)</span><span class=\"penalty-amount\">'+fmt(p)+'</span></div>';ft+=p}if(dy>365){var p=Math.max(300,tx*0.05);fi+='<div class=\"penalty-item\"><span>12 months (5% or £300)</span><span class=\"penalty-amount\">'+fmt(p)+'</span></div>';ft+=p}h+='<div class=\"result-card\"><h4>📄 Filing Penalties</h4><p>Days late: '+dy+'</p>'+fi+'<div class=\"total-row\"><span class=\"total-label\">Total:</span><span class=\"total-amount\">'+fmt(ft)+'</span></div></div>';t+=ft}if(pl){var d1=document.getElementById('sa-payment-deadline').value,d2=document.getElementById('sa-payment-date').value,tx=parseFloat(document.getElementById('sa-tax-unpaid').value)||0,dy=cd(d1,d2),pt=0,pi='';if(dy>=30){var p=tx*0.05;pi+='<div class=\"penalty-item\"><span>30 days (5%)</span><span class=\"penalty-amount\">'+fmt(p)+'</span></div>';pt+=p}if(dy>=180){var p=tx*0.05;pi+='<div class=\"penalty-item\"><span>6 months (5%)</span><span class=\"penalty-amount\">'+fmt(p)+'</span></div>';pt+=p}if(dy>=365){var p=tx*0.05;pi+='<div class=\"penalty-item\"><span>12 months (5%)</span><span class=\"penalty-amount\">'+fmt(p)+'</span></div>';pt+=p}h+='<div class=\"result-card\"><h4>💷 Payment Penalties</h4><p>Days late: '+dy+'</p>'+pi+'<div class=\"total-row\"><span class=\"total-label\">Total:</span><span class=\"total-amount\">'+fmt(pt)+'</span></div></div>';t+=pt;var it=tx*0.08*dy/365;h+='<div class=\"result-card\"><h4>📈 Interest</h4><p>8.00% for '+dy+' days</p><div class=\"total-row\"><span class=\"total-label\">Total:</span><span class=\"total-amount\">'+fmt(it)+'</span></div></div>';t+=it}h+='<div class=\"result-card\" style=\"background:#f0f4ff;border-left-color:#d32f2f\"><div style=\"display:flex;justify-content:space-between;align-items:center\"><span style=\"font-size:1.3em;font-weight:700;color:#2a5298\">GRAND TOTAL:</span><span style=\"font-size:1.8em;font-weight:700;color:#d32f2f\">'+fmt(t)+'</span></div></div>';document.getElementById('sa-results').innerHTML=h;document.getElementById('sa-results').classList.add('show')})()">Calculate Penalties</button>
-                <div id="sa-results" class="results"></div>
+            <div>
+              <h1 className="text-3xl font-bold text-gray-800">HMRC Penalty Calculator</h1>
+              <p className="text-gray-600">Self Assessment Late Filing & Payment Penalties 2025</p>
             </div>
-
-            <div id="corporation-tax" class="tab-content">
-                <div class="info-box">
-                    <p><strong>Deadlines:</strong> File within 12 months | Pay within 9 months + 1 day</p>
-                    <p><strong>Interest:</strong> 8.00% standard | 6.50% QIP</p>
-                </div>
-
-                <div class="form-section">
-                    <h3>📄 Filing Information</h3>
-                    <div class="checkbox-group">
-                        <input type="checkbox" id="ct-filed-late" onchange="document.getElementById('ct-filing-fields').style.display=this.checked?'block':'none'">
-                        <label for="ct-filed-late">I filed late</label>
-                    </div>
-                    <div id="ct-filing-fields" style="display: none; margin-top: 15px;">
-                        <div class="form-group">
-                            <label>Filing Deadline:</label>
-                            <input type="date" id="ct-filing-deadline" value="2025-03-31">
-                        </div>
-                        <div class="form-group">
-                            <label>Filing Date:</label>
-                            <input type="date" id="ct-filing-date" value="2026-02-01">
-                        </div>
-                        <div class="form-group">
-                            <label>Tax Due (£):</label>
-                            <input type="number" id="ct-tax-due" value="50000" step="0.01" min="0">
-                        </div>
-                        <div class="form-group">
-                            <label>Consecutive Late Returns:</label>
-                            <select id="ct-consecutive">
-                                <option value="1">1 (First time)</option>
-                                <option value="2">2 (Second time)</option>
-                                <option value="3">3+ times</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="form-section">
-                    <h3>💷 Payment Information</h3>
-                    <div class="checkbox-group">
-                        <input type="checkbox" id="ct-paid-late" onchange="document.getElementById('ct-payment-fields').style.display=this.checked?'block':'none'">
-                        <label for="ct-paid-late">I paid late</label>
-                    </div>
-                    <div id="ct-payment-fields" style="display: none; margin-top: 15px;">
-                        <div class="form-group">
-                            <label>Payment Deadline:</label>
-                            <input type="date" id="ct-payment-deadline" value="2025-01-01">
-                        </div>
-                        <div class="form-group">
-                            <label>Payment Date:</label>
-                            <input type="date" id="ct-payment-date" value="2026-02-01">
-                        </div>
-                        <div class="form-group">
-                            <label>Amount Unpaid (£):</label>
-                            <input type="number" id="ct-tax-unpaid" value="50000" step="0.01" min="0">
-                        </div>
-                        <div class="checkbox-group">
-                            <input type="checkbox" id="ct-is-qip">
-                            <label for="ct-is-qip">Large/Very Large (QIP)</label>
-                        </div>
-                    </div>
-                </div>
-
-                <button class="calculate-btn" onclick="(function(){var fl=document.getElementById('ct-filed-late').checked,pl=document.getElementById('ct-paid-late').checked;if(!fl&&!pl){alert('Please check at least one option');return}var fmt=function(n){return'£'+n.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,',')},cd=function(a,b){return Math.max(0,Math.ceil((new Date(b)-new Date(a))/864e5))},h='',t=0;if(fl){var d1=document.getElementById('ct-filing-deadline').value,d2=document.getElementById('ct-filing-date').value,tx=parseFloat(document.getElementById('ct-tax-due').value)||0,cn=parseInt(document.getElementById('ct-consecutive').value),dy=cd(d1,d2),bp=cn>=3?500:100,ft=0,fi='';if(dy>=1){fi+='<div class=\"penalty-item\"><span>Initial (£'+bp+')</span><span class=\"penalty-amount\">£'+bp+'.00</span></div>';ft+=bp}if(dy>90){fi+='<div class=\"penalty-item\"><span>3 months (£'+bp+')</span><span class=\"penalty-amount\">£'+bp+'.00</span></div>';ft+=bp}if(dy>180){var p=tx*0.10;fi+='<div class=\"penalty-item\"><span>6 months (10%)</span><span class=\"penalty-amount\">'+fmt(p)+'</span></div>';ft+=p}if(dy>365){var p=tx*0.10;fi+='<div class=\"penalty-item\"><span>12 months (10%)</span><span class=\"penalty-amount\">'+fmt(p)+'</span></div>';ft+=p}h+='<div class=\"result-card\"><h4>📄 Filing Penalties</h4><p>Days late: '+dy+' | Consecutive: '+cn+'</p>'+fi+'<div class=\"total-row\"><span class=\"total-label\">Total:</span><span class=\"total-amount\">'+fmt(ft)+'</span></div></div>';t+=ft}if(pl){var d1=document.getElementById('ct-payment-deadline').value,d2=document.getElementById('ct-payment-date').value,tx=parseFloat(document.getElementById('ct-tax-unpaid').value)||0,qp=document.getElementById('ct-is-qip').checked,dy=cd(d1,d2),rt=qp?0.065:0.08,it=tx*rt*dy/365;h+='<div class=\"result-card\"><h4>📈 Interest (NO penalties)</h4><p>'+(rt*100).toFixed(2)+'% '+(qp?'(QIP) ':'')+'for '+dy+' days</p><div class=\"total-row\"><span class=\"total-label\">Total:</span><span class=\"total-amount\">'+fmt(it)+'</span></div></div>';t+=it}h+='<div class=\"result-card\" style=\"background:#f0f4ff;border-left-color:#d32f2f\"><div style=\"display:flex;justify-content:space-between;align-items:center\"><span style=\"font-size:1.3em;font-weight:700;color:#2a5298\">GRAND TOTAL:</span><span style=\"font-size:1.8em;font-weight:700;color:#d32f2f\">'+fmt(t)+'</span></div></div>';document.getElementById('ct-results').innerHTML=h;document.getElementById('ct-results').classList.add('show')})()">Calculate Penalties</button>
-                <div id="ct-results" class="results"></div>
+          </div>
+          
+          <div className="bg-blue-50 border-l-4 border-blue-600 p-4 rounded-r-lg">
+            <div className="flex items-start gap-3">
+              <AlertCircle className="text-blue-600 flex-shrink-0 mt-1" size={20} />
+              <div className="text-sm text-gray-700">
+                <p className="font-semibold mb-1">Current Interest Rate: {CURRENT_INTEREST_RATE}%</p>
+                <p>This calculator uses the latest HMRC penalty rules effective from August 2025.</p>
+              </div>
             </div>
+          </div>
         </div>
+
+        <div className="grid lg:grid-cols-2 gap-6">
+          {/* Input Section */}
+          <div className="bg-white rounded-2xl shadow-xl p-6 sm:p-8">
+            <h2 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+              <Calendar className="text-blue-600" size={24} />
+              Enter Your Details
+            </h2>
+
+            <div className="space-y-5">
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Tax Amount Due (£)
+                </label>
+                <input
+                  type="number"
+                  value={taxDue}
+                  onChange={(e) => setTaxDue(e.target.value)}
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all"
+                  placeholder="e.g., 5000"
+                />
+              </div>
+
+              <div className="border-t-2 border-gray-100 pt-5">
+                <h3 className="text-lg font-bold text-gray-800 mb-4">Filing Information</h3>
+                
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Filing Deadline
+                    </label>
+                    <input
+                      type="date"
+                      value={filingDeadline}
+                      onChange={(e) => setFilingDeadline(e.target.value)}
+                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Actual/Expected Filing Date
+                    </label>
+                    <input
+                      type="date"
+                      value={filingDate}
+                      onChange={(e) => setFilingDate(e.target.value)}
+                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="border-t-2 border-gray-100 pt-5">
+                <h3 className="text-lg font-bold text-gray-800 mb-4">Payment Information</h3>
+                
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Payment Deadline
+                    </label>
+                    <input
+                      type="date"
+                      value={paymentDeadline}
+                      onChange={(e) => setPaymentDeadline(e.target.value)}
+                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Actual/Expected Payment Date
+                    </label>
+                    <input
+                      type="date"
+                      value={paymentDate}
+                      onChange={(e) => setPaymentDate(e.target.value)}
+                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <button
+                onClick={handleCalculate}
+                className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white font-bold py-4 px-6 rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+              >
+                Calculate Penalties
+              </button>
+            </div>
+          </div>
+
+          {/* Results Section */}
+          <div className="bg-white rounded-2xl shadow-xl p-6 sm:p-8">
+            <h2 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+              <Pound className="text-green-600" size={24} />
+              Your Penalties
+            </h2>
+
+            {!results ? (
+              <div className="text-center py-12">
+                <div className="bg-gray-100 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-4">
+                  <Calculator className="text-gray-400" size={40} />
+                </div>
+                <p className="text-gray-500">Enter your details and click Calculate to see your penalties</p>
+              </div>
+            ) : (
+              <div className="space-y-6">
+                {/* Summary Box */}
+                <div className="bg-gradient-to-br from-red-50 to-red-100 border-2 border-red-300 rounded-xl p-6">
+                  <div className="text-center">
+                    <p className="text-sm font-semibold text-red-800 mb-2">Total Amount to Pay</p>
+                    <p className="text-4xl font-bold text-red-900">
+                      £{results.grandTotal.toFixed(2)}
+                    </p>
+                    <p className="text-xs text-red-700 mt-2">
+                      (Tax: £{results.taxAmount.toFixed(2)} + Penalties & Interest: £{(results.grandTotal - results.taxAmount).toFixed(2)})
+                    </p>
+                  </div>
+                </div>
+
+                {/* Filing Penalties */}
+                {results.filingPenalties.penalties.length > 0 && (
+                  <div className="border-2 border-orange-200 rounded-xl p-5 bg-orange-50">
+                    <h3 className="font-bold text-gray-800 mb-3 flex items-center justify-between">
+                      <span>Late Filing Penalties</span>
+                      <span className="text-orange-600">{results.filingDaysLate} days late</span>
+                    </h3>
+                    <div className="space-y-3">
+                      {results.filingPenalties.penalties.map((penalty, idx) => (
+                        <div key={idx} className="flex justify-between items-start text-sm bg-white p-3 rounded-lg">
+                          <div>
+                            <p className="font-semibold text-gray-700">{penalty.description}</p>
+                            <p className="text-xs text-gray-500">{penalty.trigger}</p>
+                          </div>
+                          <p className="font-bold text-orange-600">£{penalty.amount.toFixed(2)}</p>
+                        </div>
+                      ))}
+                      <div className="border-t-2 border-orange-200 pt-3 flex justify-between items-center font-bold">
+                        <span className="text-gray-700">Subtotal:</span>
+                        <span className="text-orange-600 text-lg">£{results.filingPenalties.total.toFixed(2)}</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Payment Penalties */}
+                {results.paymentPenalties.penalties.length > 0 && (
+                  <div className="border-2 border-purple-200 rounded-xl p-5 bg-purple-50">
+                    <h3 className="font-bold text-gray-800 mb-3 flex items-center justify-between">
+                      <span>Late Payment Penalties</span>
+                      <span className="text-purple-600">{results.paymentDaysLate} days late</span>
+                    </h3>
+                    <div className="space-y-3">
+                      {results.paymentPenalties.penalties.map((penalty, idx) => (
+                        <div key={idx} className="flex justify-between items-start text-sm bg-white p-3 rounded-lg">
+                          <div>
+                            <p className="font-semibold text-gray-700">{penalty.description}</p>
+                            <p className="text-xs text-gray-500">{penalty.trigger}</p>
+                          </div>
+                          <p className="font-bold text-purple-600">£{penalty.amount.toFixed(2)}</p>
+                        </div>
+                      ))}
+                      <div className="border-t-2 border-purple-200 pt-3 flex justify-between items-center font-bold">
+                        <span className="text-gray-700">Subtotal:</span>
+                        <span className="text-purple-600 text-lg">£{results.paymentPenalties.total.toFixed(2)}</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Interest */}
+                {results.interest > 0 && (
+                  <div className="border-2 border-blue-200 rounded-xl p-5 bg-blue-50">
+                    <h3 className="font-bold text-gray-800 mb-3">Interest on Late Payment</h3>
+                    <div className="bg-white p-3 rounded-lg">
+                      <div className="flex justify-between items-center text-sm mb-2">
+                        <span className="text-gray-700">Interest rate:</span>
+                        <span className="font-semibold text-blue-600">{CURRENT_INTEREST_RATE}% per annum</span>
+                      </div>
+                      <div className="flex justify-between items-center text-sm mb-2">
+                        <span className="text-gray-700">Days overdue:</span>
+                        <span className="font-semibold text-blue-600">{results.paymentDaysLate} days</span>
+                      </div>
+                      <div className="border-t-2 border-blue-200 pt-3 mt-3 flex justify-between items-center font-bold">
+                        <span className="text-gray-700">Interest charged:</span>
+                        <span className="text-blue-600 text-lg">£{results.interest.toFixed(2)}</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {results.filingDaysLate === 0 && results.paymentDaysLate === 0 && (
+                  <div className="bg-green-50 border-2 border-green-300 rounded-xl p-6 text-center">
+                    <div className="text-green-600 text-5xl mb-3">✓</div>
+                    <p className="text-green-800 font-bold text-lg">No Penalties!</p>
+                    <p className="text-green-700 text-sm mt-2">You're filing and paying on time.</p>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Information Box */}
+        <div className="bg-white rounded-2xl shadow-xl p-6 sm:p-8 mt-6">
+          <h3 className="text-xl font-bold text-gray-800 mb-4">Important Information</h3>
+          <div className="grid md:grid-cols-2 gap-6 text-sm text-gray-700">
+            <div>
+              <h4 className="font-bold text-blue-600 mb-2">Late Filing Penalties:</h4>
+              <ul className="space-y-1 list-disc list-inside">
+                <li>£100 immediately after deadline</li>
+                <li>£10/day after 3 months (max 90 days)</li>
+                <li>5% of tax or £300 after 6 months</li>
+                <li>Another 5% or £300 after 12 months</li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="font-bold text-purple-600 mb-2">Late Payment Penalties:</h4>
+              <ul className="space-y-1 list-disc list-inside">
+                <li>5% penalty at 30 days overdue</li>
+                <li>5% penalty at 6 months overdue</li>
+                <li>5% penalty at 12 months overdue</li>
+                <li>Interest charged from day 1</li>
+              </ul>
+            </div>
+          </div>
+          <div className="mt-4 p-4 bg-yellow-50 rounded-lg border border-yellow-200">
+            <p className="text-sm text-gray-700">
+              <strong>Note:</strong> If you have a reasonable excuse (e.g., serious illness, bereavement), you can appeal penalties within 30 days. 
+              Consider setting up a Time to Pay arrangement with HMRC if you're struggling to pay.
+            </p>
+          </div>
+        </div>
+      </div>
     </div>
-</body>
-</html>
+  );
+}
